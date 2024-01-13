@@ -15,6 +15,7 @@ import (
 )
 
 func main() {
+	//Load Env
 	godotenv.Load("../.env")
 
 	ctx := context.Background()
@@ -39,7 +40,7 @@ func main() {
 	dbPool := database.GetPostgresqlConnection(ctx, *database.NewConfig())
 
 	//Assing all routes to mux router
-	userRouter := router.NewUserRouter(&ctx, dbPool)
+	userRouter := router.NewAuthRouter(&ctx, dbPool)
 	userRouter.RegisterUserRoutes(muxRouter)
 
 	//Log it

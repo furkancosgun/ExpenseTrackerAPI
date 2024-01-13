@@ -1,7 +1,5 @@
--- Veritabanı oluştur
 CREATE DATABASE expense_tracker;
 
--- Kullanıcı tablosu oluştur
 CREATE TABLE users (
     email VARCHAR(255) PRIMARY KEY,
     first_name VARCHAR(255),
@@ -10,3 +8,7 @@ CREATE TABLE users (
     account_confirmed BOOLEAN
 );
 
+CREATE TABLE tokens (
+    email VARCHAR(255) PRIMARY KEY,
+    token VARCHAR(255) 
+)

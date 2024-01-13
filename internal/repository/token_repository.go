@@ -18,8 +18,8 @@ type TokenRepository struct {
 	dbPool *pgxpool.Pool
 }
 
-func NewTokenRepository(ctx *context.Context, dbPool *pgxpool.Pool) ITokenRepository {
-	return &TokenRepository{}
+func NewTokenRepository(ctx context.Context, dbPool *pgxpool.Pool) ITokenRepository {
+	return &TokenRepository{ctx: &ctx, dbPool: dbPool}
 }
 
 // CreateToken implements ITokenRepository.

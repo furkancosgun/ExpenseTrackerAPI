@@ -19,8 +19,8 @@ type UserRepository struct {
 	dbPool *pgxpool.Pool
 }
 
-func NewUserRepository(ctx *context.Context, dbPool *pgxpool.Pool) IUserRepository {
-	return &UserRepository{ctx: ctx, dbPool: dbPool}
+func NewUserRepository(ctx context.Context, dbPool *pgxpool.Pool) IUserRepository {
+	return &UserRepository{ctx: &ctx, dbPool: dbPool}
 }
 
 // GetUserByEmail implements IUserRepository.
