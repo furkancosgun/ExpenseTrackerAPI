@@ -10,10 +10,13 @@ import (
 	"github.com/furkancosgun/expense-tracker-api/internal/middleware"
 	"github.com/furkancosgun/expense-tracker-api/internal/router"
 	"github.com/gorilla/mux"
+	"github.com/joho/godotenv"
 	"github.com/labstack/gommon/log"
 )
 
 func main() {
+	godotenv.Load("../.env")
+
 	ctx := context.Background()
 
 	//Create Listen Addr

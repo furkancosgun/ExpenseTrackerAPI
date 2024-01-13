@@ -33,6 +33,9 @@ type UserVerifyAccountRequest struct {
 	Otp   string
 }
 
+func (user *UserVerifyAccountRequest) ToNormalized() {
+	user.Email = strings.ToUpper(user.Email)
+}
 func (user *UserVerifyAccountRequest) Validate() error {
 	if user.Email == "" {
 		return common.EMAIL_CANT_BE_EMPTY

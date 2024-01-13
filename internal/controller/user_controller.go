@@ -72,3 +72,14 @@ func (controller *UserController) Register(w http.ResponseWriter, r *http.Reques
 
 	w.WriteHeader(http.StatusCreated)
 }
+
+func VerifyAccount(w http.ResponseWriter, r *http.Request) {
+	var userVerifyAccounRequest dto.UserVerifyAccountRequest
+
+	err := json.NewDecoder(r.Body).Decode(&userVerifyAccounRequest)
+	if err != nil {
+		helper.JsonWriteToErrorResponse(w, err, http.StatusBadRequest)
+		return
+	}
+
+}
