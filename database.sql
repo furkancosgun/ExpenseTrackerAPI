@@ -10,6 +10,6 @@ CREATE TABLE users (
 
 CREATE TABLE tokens (
     email VARCHAR(255) PRIMARY KEY,
-    token VARCHAR(255), 
+    token VARCHAR(255),
     expires_at timestamp
 )

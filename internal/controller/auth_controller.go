@@ -81,7 +81,6 @@ func VerifyAccount(w http.ResponseWriter, r *http.Request) {
 		helper.JsonWriteToErrorResponse(w, err, http.StatusBadRequest)
 		return
 	}
-
 }
 
 func (controller *AuthController) VerifyAccount(w http.ResponseWriter, r *http.Request) {
@@ -95,6 +94,44 @@ func (controller *AuthController) VerifyAccount(w http.ResponseWriter, r *http.R
 	}
 
 	err = controller.service.VerifyAccount(userVerifyAccounRequest)
+	if err != nil {
+		helper.JsonWriteToErrorResponse(w, err, http.StatusBadRequest)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+
+func (controller *AuthController) ForgotPassword(w http.ResponseWriter, r *http.Request) {
+	var userForgotPasswordRequest dto.UserForgotPasswordRequest
+
+	//Json Decode
+	err := json.NewDecoder(r.Body).Decode(&userForgotPasswordRequest)
+	if err != nil {
+		helper.JsonWriteToErrorResponse(w, err, http.StatusBadRequest)
+		return
+	}
+
+	err = controller.service.ForgotPassword(userForgotPasswordRequest)
+	if err != nil {
+		helper.JsonWriteToErrorResponse(w, err, http.StatusBadRequest)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+
+func (controller *AuthController) ResetPassword(w http.ResponseWriter, r *http.Request) {
+	var userResetPasswordRequest dto.UserResetPasswordRequest
+
+	//Json Decode
+	err := json.NewDecoder(r.Body).Decode(&userResetPasswordRequest)
+	if err != nil {
+		helper.JsonWriteToErrorResponse(w, err, http.StatusBadRequest)
+		return
+	}
+
+	err = controller.service.ResetPassword(userResetPasswordRequest)
 	if err != nil {
 		helper.JsonWriteToErrorResponse(w, err, http.StatusBadRequest)
 		return

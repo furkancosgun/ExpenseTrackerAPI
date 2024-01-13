@@ -8,6 +8,7 @@ const LOGIN_URL = "/api/v1/auth/login"
 const REGISTER_URL = "/api/v1/auth/register"
 const FORGOT_PASSWORD_URL = "/api/v1/auth/forgot-password"
 const VERIFY_ACCOUNT_URL = "/api/v1/auth/verify-account"
+const RESET_PASSWORD_URL = "/api/v1/auth/reset-password"
 
 // Errors
 var EMAIL_CANT_BE_EMPTY = errors.New("Email Can't be empty!")
@@ -25,6 +26,7 @@ var NOT_REQUIRED_AUTH_CHECK_URLS = []string{
 	REGISTER_URL,
 	FORGOT_PASSWORD_URL,
 	VERIFY_ACCOUNT_URL,
+	RESET_PASSWORD_URL,
 }
 
 const JWT_KEY = "VERY_IMPORTANT_JWT_AUTH_KEY"

@@ -37,4 +37,6 @@ func (authRouter *AuthRouter) RegisterUserRoutes(router *mux.Router) {
 	router.HandleFunc(common.LOGIN_URL, controler.Login).Methods("POST")
 	router.HandleFunc(common.REGISTER_URL, controler.Register).Methods("POST")
 	router.HandleFunc(common.VERIFY_ACCOUNT_URL, controler.VerifyAccount).Methods("POST")
+	router.HandleFunc(common.FORGOT_PASSWORD_URL, controler.ForgotPassword).Methods("POST")
+	router.HandleFunc(common.RESET_PASSWORD_URL, controler.ResetPassword).Methods("POST")
 }

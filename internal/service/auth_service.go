@@ -15,6 +15,8 @@ type IAuthService interface {
 	Login(user dto.UserLoginRequest) (model.User, error)
 	Register(user dto.UserRegisterRequest) error
 	VerifyAccount(user dto.UserVerifyAccountRequest) error
+	ForgotPassword(userForgotPasswordRequest dto.UserForgotPasswordRequest) error
+	ResetPassword(user dto.UserResetPasswordRequest) error
 }
 
 type AuthService struct {
@@ -22,9 +24,56 @@ type AuthService struct {
 	tokenRepository repository.ITokenRepository
 }
 
+// ResetPassword implements IAuthService.
+func (service *AuthService) ResetPassword(user dto.UserResetPasswordRequest) error {
+	var err error
+
+	err = user.Validate()
+	if err != nil {
+		return err
+	}
+
+	findedUser, err := service.authRepository.GetUserByEmail(user.Email)
+	if err != nil {
+		return common.USER_NOT_FOUND
+	}
+
+	//Check Token Sended?
+	tokenModel, err := service.tokenRepository.GetTokenByEmail(user.Email)
+	if err != nil || tokenModel.Token != user.Otp || time.Now().After(tokenModel.ExpiresAt) {
+		return common.INVALID_OTP_TOKEN
+	}
+
+	//Hash Password
+	findedUser.Password = helper.HashPassword(user.Password)
+
+	err = service.authRepository.UpdateUser(findedUser)
+	return err
+}
+
+// ForgotPassword implements IAuthService.
+func (service *AuthService) ForgotPassword(userForgotPasswordRequest dto.UserForgotPasswordRequest) error {
+	var err error
+
+	err = userForgotPasswordRequest.Validate()
+
+	_, err = service.authRepository.GetUserByEmail(userForgotPasswordRequest.Email)
+	if err != nil {
+		return common.USER_NOT_FOUND
+	}
+
+	service.SendOtpToken(userForgotPasswordRequest.Email)
+
+	return err
+}
+
+func NewAuthService(authRepository repository.IUserRepository, tokenRepository repository.ITokenRepository) IAuthService {
+	return &AuthService{authRepository: authRepository, tokenRepository: tokenRepository}
+}
+
 // VerifyAccount implements IAuthService.
 func (service *AuthService) VerifyAccount(user dto.UserVerifyAccountRequest) error {
-	user.ToNormalized()
+
 	err := user.Validate()
 	if err != nil {
 		return err
@@ -32,9 +81,9 @@ func (service *AuthService) VerifyAccount(user dto.UserVerifyAccountRequest) err
 
 	userModel, err := service.authRepository.GetUserByEmail(user.Email)
 	if err != nil {
-		return err
+		return common.USER_NOT_FOUND
 	}
-
+	//Check Token Sended?
 	tokenModel, err := service.tokenRepository.GetTokenByEmail(user.Email)
 	if err != nil {
 		return err
@@ -50,15 +99,9 @@ func (service *AuthService) VerifyAccount(user dto.UserVerifyAccountRequest) err
 	return nil
 }
 
-func NewAuthService(authRepository repository.IUserRepository, tokenRepository repository.ITokenRepository) IAuthService {
-	return &AuthService{authRepository: authRepository, tokenRepository: tokenRepository}
-}
-
 // Login implements IUserService.
 func (service *AuthService) Login(user dto.UserLoginRequest) (model.User, error) {
 	var responseUser model.User
-
-	user.ToNormalized()
 
 	//Check Is Valid?
 	err := user.Validate()
@@ -87,8 +130,6 @@ func (service *AuthService) Login(user dto.UserLoginRequest) (model.User, error)
 
 // Register implements IUserService.
 func (service *AuthService) Register(user dto.UserRegisterRequest) error {
-	user.ToNormalized()
-
 	//Check Is Valid?
 	err := user.Validate()
 	if err != nil {
@@ -102,10 +143,9 @@ func (service *AuthService) Register(user dto.UserRegisterRequest) error {
 	}
 
 	//Hash Password
-	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
-	user.Password = string(hashedPassword)
+	user.Password = helper.HashPassword(user.Password)
 
-	//Conver User Model And Normalized value
+	//Convert User Model
 	userModel := user.ToUser()
 
 	//User Already Have Override Else Save User To Db
@@ -118,16 +158,22 @@ func (service *AuthService) Register(user dto.UserRegisterRequest) error {
 		return err
 	}
 
-	//Generate OTP Code
+	err = service.SendOtpToken(userModel.Email)
+
+	return err
+}
+
+func (service *AuthService) SendOtpToken(email string) error {
+	var err error
+
 	otpCode := helper.GenerateOTP(6)
 
-	//Save To Db OTP
 	token := model.Token{
-		Email:     user.Email,
+		Email:     email,
 		Token:     otpCode,
 		ExpiresAt: time.Now().Add(time.Minute * 5),
 	}
-	_, err = service.tokenRepository.GetTokenByEmail(user.Email)
+	_, err = service.tokenRepository.GetTokenByEmail(email)
 	if err == nil {
 		err = service.tokenRepository.UpdateToken(token)
 	} else {
@@ -136,6 +182,5 @@ func (service *AuthService) Register(user dto.UserRegisterRequest) error {
 	if err == nil {
 		err = NewOtpMailContent(token.Email, token.Token, token.ExpiresAt).Send()
 	}
-
 	return err
 }

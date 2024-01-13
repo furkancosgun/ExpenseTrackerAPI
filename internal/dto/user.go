@@ -5,17 +5,11 @@ import (
 
 	"github.com/furkancosgun/expense-tracker-api/internal/common"
 	"github.com/furkancosgun/expense-tracker-api/internal/model"
-	"golang.org/x/text/cases"
-	"golang.org/x/text/language"
 )
 
 type UserLoginRequest struct {
 	Email    string
 	Password string
-}
-
-func (user *UserLoginRequest) ToNormalized() {
-	user.Email = strings.ToUpper(user.Email)
 }
 
 func (user *UserLoginRequest) Validate() error {
@@ -28,14 +22,30 @@ func (user *UserLoginRequest) Validate() error {
 	return nil
 }
 
+type UserResetPasswordRequest struct {
+	Email    string
+	Password string
+	Otp      string
+}
+
+func (user *UserResetPasswordRequest) Validate() error {
+	if user.Email == "" {
+		return common.EMAIL_CANT_BE_EMPTY
+	}
+	if user.Password == "" {
+		return common.PASSWORD_CANT_BE_EMPTY
+	}
+	if user.Otp == "" {
+		return common.OTP_CODE_CANT_BE_EMPTY
+	}
+	return nil
+}
+
 type UserVerifyAccountRequest struct {
 	Email string
 	Otp   string
 }
 
-func (user *UserVerifyAccountRequest) ToNormalized() {
-	user.Email = strings.ToUpper(user.Email)
-}
 func (user *UserVerifyAccountRequest) Validate() error {
 	if user.Email == "" {
 		return common.EMAIL_CANT_BE_EMPTY
@@ -53,11 +63,6 @@ type UserRegisterRequest struct {
 	Password  string
 }
 
-func (user *UserRegisterRequest) ToNormalized() {
-	user.Email = strings.ToUpper(user.Email)
-	user.FirstName = cases.Title(language.English, cases.Compact).String(user.FirstName)
-	user.LastName = strings.ToUpper(user.LastName)
-}
 func (user *UserRegisterRequest) ToUser() model.User {
 	return model.User{
 		Email:            user.Email,
@@ -86,4 +91,17 @@ func (user *UserRegisterRequest) Validate() error {
 
 type UserLoginResponse struct {
 	Token string
+}
+
+type UserForgotPasswordRequest struct {
+	Email string
+}
+
+func (user *UserForgotPasswordRequest) Validate() error {
+	user.Email = strings.TrimSpace(user.Email)
+	user.Email = strings.ToLower(user.Email)
+	if user.Email == "" {
+		return common.EMAIL_CANT_BE_EMPTY
+	}
+	return nil
 }
