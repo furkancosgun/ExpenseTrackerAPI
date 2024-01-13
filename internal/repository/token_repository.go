@@ -25,8 +25,8 @@ func NewTokenRepository(ctx context.Context, dbPool *pgxpool.Pool) ITokenReposit
 // CreateToken implements ITokenRepository.
 func (repository *TokenRepository) CreateToken(token model.Token) error {
 	_, err := repository.dbPool.Exec(*repository.ctx,
-		"INSERT INTO tokens (email,token) VALUES ($1,$2)",
-		token.Email, token.Token,
+		"INSERT INTO tokens (email,token,expires_at) VALUES ($1,$2,$3)",
+		token.Email, token.Token, token.ExpiresAt,
 	)
 	return err
 }
@@ -39,7 +39,8 @@ func (repository *TokenRepository) GetTokenByEmail(email string) (model.Token, e
 		"SELECT * FROM tokens WHERE email = $1",
 		email,
 	)
-	err := row.Scan(&token.Email, &token.Token)
+
+	err := row.Scan(&token.Email, &token.Token, &token.ExpiresAt)
 
 	return token, err
 }
@@ -47,8 +48,8 @@ func (repository *TokenRepository) GetTokenByEmail(email string) (model.Token, e
 // UpdateToken implements ITokenRepository.
 func (repository *TokenRepository) UpdateToken(token model.Token) error {
 	_, err := repository.dbPool.Exec(*repository.ctx,
-		"INSERT INTO tokens (email,token) VALUES ($1,$2)",
-		token.Email, token.Token,
+		"UPDATE tokens SET token = $1 , expires_at = $2 WHERE email = $3",
+		token.Token, token.ExpiresAt, token.Email,
 	)
 	return err
 }

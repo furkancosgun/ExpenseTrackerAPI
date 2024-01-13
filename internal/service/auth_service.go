@@ -1,6 +1,8 @@
 package service
 
 import (
+	"time"
+
 	"github.com/furkancosgun/expense-tracker-api/internal/common"
 	"github.com/furkancosgun/expense-tracker-api/internal/dto"
 	"github.com/furkancosgun/expense-tracker-api/internal/helper"
@@ -22,21 +24,28 @@ type AuthService struct {
 
 // VerifyAccount implements IAuthService.
 func (service *AuthService) VerifyAccount(user dto.UserVerifyAccountRequest) error {
+	user.ToNormalized()
 	err := user.Validate()
 	if err != nil {
 		return err
 	}
 
-	user.ToNormalized()
-	tokenModel, err := service.tokenRepository.GetTokenByEmail(user.Email)
-
+	userModel, err := service.authRepository.GetUserByEmail(user.Email)
 	if err != nil {
 		return err
 	}
 
-	if tokenModel.Token != user.Otp {
+	tokenModel, err := service.tokenRepository.GetTokenByEmail(user.Email)
+	if err != nil {
+		return err
+	}
+
+	if tokenModel.Token != user.Otp || time.Now().After(tokenModel.ExpiresAt) {
 		return common.INVALID_OTP_TOKEN
 	}
+
+	userModel.AccountConfirmed = true
+	service.authRepository.UpdateUser(userModel)
 
 	return nil
 }
@@ -49,14 +58,13 @@ func NewAuthService(authRepository repository.IUserRepository, tokenRepository r
 func (service *AuthService) Login(user dto.UserLoginRequest) (model.User, error) {
 	var responseUser model.User
 
+	user.ToNormalized()
+
 	//Check Is Valid?
 	err := user.Validate()
 	if err != nil {
 		return responseUser, err
 	}
-
-	user.ToNormalized()
-
 	//Check Already Has Email?
 	responseUser, err = service.authRepository.GetUserByEmail(user.Email)
 	if err != nil {
@@ -115,8 +123,9 @@ func (service *AuthService) Register(user dto.UserRegisterRequest) error {
 
 	//Save To Db OTP
 	token := model.Token{
-		Email: user.Email,
-		Token: otpCode,
+		Email:     user.Email,
+		Token:     otpCode,
+		ExpiresAt: time.Now().Add(time.Minute * 5),
 	}
 	_, err = service.tokenRepository.GetTokenByEmail(user.Email)
 	if err == nil {
@@ -125,7 +134,7 @@ func (service *AuthService) Register(user dto.UserRegisterRequest) error {
 		err = service.tokenRepository.CreateToken(token)
 	}
 	if err == nil {
-		err = NewOtpMailContent(user.Email, otpCode).Send()
+		err = NewOtpMailContent(token.Email, token.Token, token.ExpiresAt).Send()
 	}
 
 	return err

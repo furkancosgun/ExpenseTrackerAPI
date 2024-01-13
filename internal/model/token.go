@@ -1,6 +1,9 @@
 package model
 
+import "time"
+
 type Token struct {
-	Email string
-	Token string
+	Email     string
+	Token     string
+	ExpiresAt time.Time
 }
