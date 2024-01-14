@@ -50,7 +50,11 @@ func (controller *AuthController) Login(w http.ResponseWriter, r *http.Request) 
 	token := jwt.NewWithClaims(jwt.GetSigningMethod("HS256"), claim)
 	tokenString, _ := token.SignedString([]byte(common.JWT_KEY))
 
-	helper.JsonWriteToResponse(w, dto.UserLoginResponse{Token: tokenString}, http.StatusOK)
+	helper.JsonWriteToResponse(w, dto.UserLoginResponse{Token: tokenString,
+		FirstName: claim.FirstName,
+		LastName:  claim.LastName,
+		Email:     claim.Email,
+	}, http.StatusOK)
 }
 
 func (controller *AuthController) Register(w http.ResponseWriter, r *http.Request) {

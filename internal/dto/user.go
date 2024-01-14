@@ -19,6 +19,7 @@ func (user *UserLoginRequest) Validate() error {
 	if user.Password == "" {
 		return common.PASSWORD_CANT_BE_EMPTY
 	}
+	user.Email = strings.ToLower(user.Email)
 	return nil
 }
 
@@ -38,6 +39,7 @@ func (user *UserResetPasswordRequest) Validate() error {
 	if user.Otp == "" {
 		return common.OTP_CODE_CANT_BE_EMPTY
 	}
+	user.Email = strings.ToLower(user.Email)
 	return nil
 }
 
@@ -53,6 +55,7 @@ func (user *UserVerifyAccountRequest) Validate() error {
 	if user.Otp == "" {
 		return common.OTP_CODE_CANT_BE_EMPTY
 	}
+	user.Email = strings.ToLower(user.Email)
 	return nil
 }
 
@@ -86,11 +89,15 @@ func (user *UserRegisterRequest) Validate() error {
 	if user.Password == "" {
 		return common.PASSWORD_CANT_BE_EMPTY
 	}
+	user.Email = strings.ToLower(user.Email)
 	return nil
 }
 
 type UserLoginResponse struct {
-	Token string
+	FirstName string
+	LastName  string
+	Email     string
+	Token     string
 }
 
 type UserForgotPasswordRequest struct {

@@ -73,7 +73,6 @@ func NewAuthService(authRepository repository.IUserRepository, tokenRepository r
 
 // VerifyAccount implements IAuthService.
 func (service *AuthService) VerifyAccount(user dto.UserVerifyAccountRequest) error {
-
 	err := user.Validate()
 	if err != nil {
 		return err
