@@ -33,7 +33,6 @@ func main() {
 
 	//Add Middlewares
 	muxRouter.Use(middleware.ApplicationMiddleware)
-	muxRouter.Use(middleware.LoggerMiddleware)
 	muxRouter.Use(middleware.AuthenticationMiddleware)
 
 	//Create Db Connection

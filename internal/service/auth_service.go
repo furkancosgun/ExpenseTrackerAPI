@@ -8,6 +8,7 @@ import (
 	"github.com/furkancosgun/expense-tracker-api/internal/helper"
 	"github.com/furkancosgun/expense-tracker-api/internal/model"
 	"github.com/furkancosgun/expense-tracker-api/internal/repository"
+	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -107,6 +108,7 @@ func (service *AuthService) Login(user dto.UserLoginRequest) (model.User, error)
 	if err != nil {
 		return responseUser, err
 	}
+
 	//Check Already Has Email?
 	responseUser, err = service.authRepository.GetUserByEmail(user.Email)
 	if err != nil {
@@ -146,11 +148,13 @@ func (service *AuthService) Register(user dto.UserRegisterRequest) error {
 
 	//Convert User Model
 	userModel := user.ToUser()
+	userModel.UserId = currentUser.UserId
 
 	//User Already Have Override Else Save User To Db
-	if currentUser.Email != "" {
+	if currentUser.UserId != "" {
 		err = service.authRepository.UpdateUser(userModel)
 	} else {
+		userModel.UserId = uuid.New().String()
 		err = service.authRepository.CreateUser(userModel)
 	}
 	if err != nil {

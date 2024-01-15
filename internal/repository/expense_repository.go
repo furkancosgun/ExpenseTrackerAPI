@@ -9,12 +9,23 @@ import (
 
 type IExpenseRepository interface {
 	GetExpenses(userId string) ([]model.Expense, error)
+	GetProjectByUserId(userId string) (model.Expense, error)
 	CreateExpense(token model.Expense) error
 }
 
 type ExpenseRepository struct {
 	ctx    *context.Context
 	dbPool *pgxpool.Pool
+}
+
+// GetProjectByUserId implements IExpenseRepository.
+func (repository *ExpenseRepository) GetProjectByUserId(userId string) (model.Expense, error) {
+	var expense model.Expense
+	row := repository.dbPool.QueryRow(*repository.ctx, "SELECT * FROM expenses WHERE userId = $1", userId)
+
+	err := row.Scan(&expense.Id, &expense.ProjectId, &expense.MerchantName, &expense.Amount, &expense.Date, &expense.Description, &expense.CategoryId, &expense.IncludeVat, &expense.Vat, &expense.ImagePath)
+
+	return expense, err
 }
 
 func NewExpenseRepository(ctx context.Context, dbPool *pgxpool.Pool) IExpenseRepository {
