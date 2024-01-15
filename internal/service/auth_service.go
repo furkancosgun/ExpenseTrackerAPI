@@ -39,7 +39,7 @@ func (service *AuthService) ResetPassword(user dto.UserResetPasswordRequest) err
 	}
 
 	//Check Token Sended?
-	tokenModel, err := service.tokenRepository.GetTokenByEmail(user.Email)
+	tokenModel, err := service.tokenRepository.GetTokenByUserId(findedUser.UserId)
 	if err != nil || tokenModel.Token != user.Otp || time.Now().After(tokenModel.ExpiresAt) {
 		return common.INVALID_OTP_TOKEN
 	}
@@ -57,12 +57,12 @@ func (service *AuthService) ForgotPassword(userForgotPasswordRequest dto.UserFor
 
 	err = userForgotPasswordRequest.Validate()
 
-	_, err = service.authRepository.GetUserByEmail(userForgotPasswordRequest.Email)
+	findedUser, err := service.authRepository.GetUserByEmail(userForgotPasswordRequest.Email)
 	if err != nil {
 		return common.USER_NOT_FOUND
 	}
 
-	service.SendOtpToken(userForgotPasswordRequest.Email)
+	service.SendOtpToken(findedUser.Email)
 
 	return err
 }
@@ -78,12 +78,12 @@ func (service *AuthService) VerifyAccount(user dto.UserVerifyAccountRequest) err
 		return err
 	}
 
-	userModel, err := service.authRepository.GetUserByEmail(user.Email)
+	findedUser, err := service.authRepository.GetUserByEmail(user.Email)
 	if err != nil {
 		return common.USER_NOT_FOUND
 	}
 	//Check Token Sended?
-	tokenModel, err := service.tokenRepository.GetTokenByEmail(user.Email)
+	tokenModel, err := service.tokenRepository.GetTokenByUserId(findedUser.UserId)
 	if err != nil {
 		return err
 	}
@@ -92,8 +92,8 @@ func (service *AuthService) VerifyAccount(user dto.UserVerifyAccountRequest) err
 		return common.INVALID_OTP_TOKEN
 	}
 
-	userModel.AccountConfirmed = true
-	service.authRepository.UpdateUser(userModel)
+	findedUser.AccountConfirmed = true
+	service.authRepository.UpdateUser(findedUser)
 
 	return nil
 }
@@ -165,21 +165,26 @@ func (service *AuthService) Register(user dto.UserRegisterRequest) error {
 func (service *AuthService) SendOtpToken(email string) error {
 	var err error
 
+	findedUser, err := service.authRepository.GetUserByEmail(email)
+	if err != nil {
+		return err
+	}
+
 	otpCode := helper.GenerateOTP(6)
 
 	token := model.Token{
-		Email:     email,
+		UserId:    findedUser.UserId,
 		Token:     otpCode,
 		ExpiresAt: time.Now().Add(time.Minute * 5),
 	}
-	_, err = service.tokenRepository.GetTokenByEmail(email)
+	_, err = service.tokenRepository.GetTokenByUserId(findedUser.UserId)
 	if err == nil {
 		err = service.tokenRepository.UpdateToken(token)
 	} else {
 		err = service.tokenRepository.CreateToken(token)
 	}
 	if err == nil {
-		err = NewOtpMailContent(token.Email, token.Token, token.ExpiresAt).Send()
+		err = NewOtpMailContent(findedUser.Email, token.Token, token.ExpiresAt).Send()
 	}
 	return err
 }

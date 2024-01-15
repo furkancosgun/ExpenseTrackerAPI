@@ -8,7 +8,7 @@ import (
 )
 
 type ITokenRepository interface {
-	GetTokenByEmail(email string) (model.Token, error)
+	GetTokenByUserId(userId string) (model.Token, error)
 	CreateToken(token model.Token) error
 	UpdateToken(token model.Token) error
 }
@@ -24,34 +24,31 @@ func NewTokenRepository(ctx context.Context, dbPool *pgxpool.Pool) ITokenReposit
 
 // CreateToken implements ITokenRepository.
 func (repository *TokenRepository) CreateToken(token model.Token) error {
-	token.Normalized()
 	_, err := repository.dbPool.Exec(*repository.ctx,
-		"INSERT INTO tokens (email,token,expires_at) VALUES ($1,$2,$3)",
-		token.Email, token.Token, token.ExpiresAt,
+		"INSERT INTO tokens (user_id,token,expires_at) VALUES ($1,$2,$3)",
+		token.UserId, token.Token, token.ExpiresAt,
 	)
 	return err
 }
 
-// GetTokenByEmail implements ITokenRepository.
-func (repository *TokenRepository) GetTokenByEmail(email string) (model.Token, error) {
+// GetTokenByUserId implements ITokenRepository.
+func (repository *TokenRepository) GetTokenByUserId(userId string) (model.Token, error) {
 	var token model.Token
 
 	row := repository.dbPool.QueryRow(*repository.ctx,
-		"SELECT * FROM tokens WHERE lower(email) = $1",
-		email,
+		"SELECT * FROM tokens WHERE user_id = $1", userId,
 	)
 
-	err := row.Scan(&token.Email, &token.Token, &token.ExpiresAt)
+	err := row.Scan(&token.UserId, &token.Token, &token.ExpiresAt)
 
 	return token, err
 }
 
 // UpdateToken implements ITokenRepository.
 func (repository *TokenRepository) UpdateToken(token model.Token) error {
-	token.Normalized()
 	_, err := repository.dbPool.Exec(*repository.ctx,
-		"UPDATE tokens SET token = $1 , expires_at = $2 WHERE lower(email) = $3",
-		token.Token, token.ExpiresAt, token.Email,
+		"UPDATE tokens SET token = $1 , expires_at = $2 WHERE user_id = $3",
+		token.Token, token.ExpiresAt, token.UserId,
 	)
 	return err
 }
