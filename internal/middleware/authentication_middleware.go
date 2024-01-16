@@ -48,7 +48,7 @@ func AuthenticationMiddleware(h http.Handler) http.Handler {
 			return
 		}
 
-		ctx := context.WithValue(r.Context(), "CLAIMS", claims)
+		ctx := context.WithValue(r.Context(), common.CLAIM, claims)
 
 		r = r.WithContext(ctx)
 		h.ServeHTTP(w, r)

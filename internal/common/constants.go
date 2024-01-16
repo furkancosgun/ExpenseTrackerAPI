@@ -10,6 +10,8 @@ const FORGOT_PASSWORD_URL = "/api/v1/auth/forgot-password"
 const VERIFY_ACCOUNT_URL = "/api/v1/auth/verify-account"
 const RESET_PASSWORD_URL = "/api/v1/auth/reset-password"
 
+const CLAIM = "CLAIM"
+
 // Errors
 var EMAIL_CANT_BE_EMPTY = errors.New("Email Can't be empty!")
 var FIRST_NAME_CANT_BE_EMPTY = errors.New("First Name Can't be empty!")

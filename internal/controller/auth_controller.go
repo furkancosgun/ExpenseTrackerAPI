@@ -40,6 +40,7 @@ func (controller *AuthController) Login(w http.ResponseWriter, r *http.Request) 
 	//Create Claim For Token
 	expiresAt := time.Now().Add(time.Hour * 24 * 30) //1 Month
 	claim := &common.Claim{
+		UserId:           user.UserId,
 		FirstName:        user.FirstName,
 		LastName:         user.LastName,
 		Email:            user.Email,

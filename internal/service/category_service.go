@@ -34,6 +34,6 @@ func (service *CategoryService) GetCategories(userId string) ([]model.Category, 
 	return service.GetCategories(userId)
 }
 
-func NewCategoryService(repository repository.CategoryRepository) ICategoryService {
-	return &CategoryService{repository: &repository}
+func NewCategoryService(repository repository.ICategoryRepository) ICategoryService {
+	return &CategoryService{repository: repository}
 }

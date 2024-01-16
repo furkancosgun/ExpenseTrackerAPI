@@ -15,9 +15,6 @@ func (dto *CategoryCreateDTO) ToModel() model.Category {
 }
 
 func (dto *CategoryCreateDTO) Validate() error {
-	if dto.UserId == "" {
-		return common.USER_ID_CANT_BE_EMPTY
-	}
 	if dto.Name == "" {
 		return common.CATEGORY_NAME_CANT_BE_EMPTY
 	}
