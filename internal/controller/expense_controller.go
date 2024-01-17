@@ -12,18 +12,18 @@ import (
 	"github.com/google/uuid"
 )
 
-type CategoryController struct {
-	service service.ICategoryService
+type ExpenseController struct {
+	service service.IExpenseService
 }
 
-func NewCategoryController(service service.ICategoryService) *CategoryController {
-	return &CategoryController{service: service}
+func NewExpenseController(service service.IExpenseService) *ExpenseController {
+	return &ExpenseController{service: service}
 }
 
-func (controller *CategoryController) GetCategories(w http.ResponseWriter, r *http.Request) {
+func (controller *ExpenseController) GetExpenses(w http.ResponseWriter, r *http.Request) {
 	userId := r.Context().Value(common.AUTH_USER_ID).(string)
 
-	categories, err := controller.service.GetCategories(userId)
+	categories, err := controller.service.GetExpenses(userId)
 
 	if err != nil {
 		helper.JsonWriteToErrorResponse(w, err, http.StatusBadRequest)
@@ -32,10 +32,10 @@ func (controller *CategoryController) GetCategories(w http.ResponseWriter, r *ht
 
 	helper.JsonWriteToResponse(w, categories, http.StatusOK)
 }
-func (controller *CategoryController) CreateCategory(w http.ResponseWriter, r *http.Request) {
+func (controller *ExpenseController) CreateExpense(w http.ResponseWriter, r *http.Request) {
 	userId := r.Context().Value(common.AUTH_USER_ID).(string)
 
-	var dto dto.CreateCategoryRequest
+	var dto dto.CreateExpenseRequest
 
 	//Json Decode
 	err := json.NewDecoder(r.Body).Decode(&dto)
@@ -44,16 +44,23 @@ func (controller *CategoryController) CreateCategory(w http.ResponseWriter, r *h
 		return
 	}
 
-	model := model.Category{
-		CategoryId: uuid.New().String(),
-		Name:       dto.Name,
-		UserId:     userId,
+	model := model.Expense{
+		ExpenseId:    uuid.NewString(),
+		ProjectId:    dto.ProjectId,
+		UserId:       userId,
+		MerchantName: dto.MerchantName,
+		Amount:       dto.Amount,
+		Date:         dto.Date,
+		Description:  dto.Description,
+		CategoryId:   dto.CategoryId,
+		IncludeVat:   dto.IncludeVat,
+		Vat:          dto.Vat,
+		ImagePath:    dto.ImagePath,
 	}
 
-	err = controller.service.CreateCategory(model)
+	err = controller.service.CreateExpense(model)
 	if err != nil {
 		helper.JsonWriteToErrorResponse(w, err, http.StatusBadRequest)
 		return
 	}
-	w.WriteHeader(http.StatusCreated)
 }

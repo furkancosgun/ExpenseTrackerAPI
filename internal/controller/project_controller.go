@@ -12,30 +12,29 @@ import (
 	"github.com/google/uuid"
 )
 
-type CategoryController struct {
-	service service.ICategoryService
+type ProjectController struct {
+	service service.IProjectService
 }
 
-func NewCategoryController(service service.ICategoryService) *CategoryController {
-	return &CategoryController{service: service}
+func NewProjectController(service service.IProjectService) *ProjectController {
+	return &ProjectController{service: service}
 }
 
-func (controller *CategoryController) GetCategories(w http.ResponseWriter, r *http.Request) {
+func (controller *ProjectController) GetProjectReportByUserId(w http.ResponseWriter, r *http.Request) {
 	userId := r.Context().Value(common.AUTH_USER_ID).(string)
 
-	categories, err := controller.service.GetCategories(userId)
-
+	projects, err := controller.service.GetProjectReportByUserId(userId)
 	if err != nil {
 		helper.JsonWriteToErrorResponse(w, err, http.StatusBadRequest)
 		return
 	}
 
-	helper.JsonWriteToResponse(w, categories, http.StatusOK)
+	helper.JsonWriteToResponse(w, projects, http.StatusOK)
 }
-func (controller *CategoryController) CreateCategory(w http.ResponseWriter, r *http.Request) {
+func (controller *ProjectController) CreateProject(w http.ResponseWriter, r *http.Request) {
 	userId := r.Context().Value(common.AUTH_USER_ID).(string)
 
-	var dto dto.CreateCategoryRequest
+	var dto dto.CreateProjectRequest
 
 	//Json Decode
 	err := json.NewDecoder(r.Body).Decode(&dto)
@@ -44,13 +43,13 @@ func (controller *CategoryController) CreateCategory(w http.ResponseWriter, r *h
 		return
 	}
 
-	model := model.Category{
-		CategoryId: uuid.New().String(),
-		Name:       dto.Name,
-		UserId:     userId,
+	model := model.Project{
+		ProjectId: uuid.New().String(),
+		Name:      dto.Name,
+		UserId:    userId,
 	}
 
-	err = controller.service.CreateCategory(model)
+	err = controller.service.CreateProject(model)
 	if err != nil {
 		helper.JsonWriteToErrorResponse(w, err, http.StatusBadRequest)
 		return

@@ -45,7 +45,7 @@ func (repository *UserRepository) CreateUser(user model.User) error {
 // UpdateUser implements IUserRepository.
 func (repository *UserRepository) UpdateUser(user model.User) error {
 	_, err := repository.dbPool.Exec(*repository.ctx,
-		"UPDATE users SET first_name = $1 ,last_name = $2,password = $3,account_confirmed = $4 email = $5 WHERE user_id = $6",
+		"UPDATE users SET first_name = $1 ,last_name = $2 ,password = $3 ,account_confirmed = $4 ,email = $5  WHERE user_id = $6",
 		user.FirstName, user.LastName, user.Password, user.AccountConfirmed, user.Email, user.UserId,
 	)
 	return err

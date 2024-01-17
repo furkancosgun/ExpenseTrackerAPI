@@ -1,10 +1,13 @@
 package model
 
-import "time"
+import (
+	"time"
+)
 
 type Expense struct {
-	Id           string
+	ExpenseId    string
 	ProjectId    string
+	UserId       string
 	MerchantName string
 	Amount       float32
 	Date         time.Time

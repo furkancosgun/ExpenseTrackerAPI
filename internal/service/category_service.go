@@ -4,12 +4,11 @@ import (
 	"github.com/furkancosgun/expense-tracker-api/internal/dto"
 	"github.com/furkancosgun/expense-tracker-api/internal/model"
 	"github.com/furkancosgun/expense-tracker-api/internal/repository"
-	"github.com/google/uuid"
 )
 
 type ICategoryService interface {
-	GetCategories(userId string) ([]model.Category, error)
-	CreateCategory(dto dto.CategoryCreateDTO) error
+	GetCategories(userId string) ([]dto.ListCategoryResponse, error)
+	CreateCategory(model model.Category) error
 }
 
 type CategoryService struct {
@@ -17,21 +16,13 @@ type CategoryService struct {
 }
 
 // CreateCategory implements ICategoryService.
-func (service *CategoryService) CreateCategory(dto dto.CategoryCreateDTO) error {
-	err := dto.Validate()
-	if err != nil {
-		return err
-	}
-	model := dto.ToModel()
-
-	model.Id = uuid.New().String()
-
+func (service *CategoryService) CreateCategory(model model.Category) error {
 	return service.repository.CreateCategory(model)
 }
 
 // GetCategories implements ICategoryService.
-func (service *CategoryService) GetCategories(userId string) ([]model.Category, error) {
-	return service.GetCategories(userId)
+func (service *CategoryService) GetCategories(userId string) ([]dto.ListCategoryResponse, error) {
+	return service.repository.GetCategories(userId)
 }
 
 func NewCategoryService(repository repository.ICategoryRepository) ICategoryService {

@@ -3,7 +3,7 @@ package model
 import "time"
 
 type Project struct {
-	Id        string
+	ProjectId string
 	UserId    string
 	Name      string
 	CreatedAt time.Time

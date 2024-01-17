@@ -8,6 +8,7 @@ import (
 	"github.com/furkancosgun/expense-tracker-api/internal/common"
 	"github.com/furkancosgun/expense-tracker-api/internal/dto"
 	"github.com/furkancosgun/expense-tracker-api/internal/helper"
+	"github.com/furkancosgun/expense-tracker-api/internal/model"
 	"github.com/furkancosgun/expense-tracker-api/internal/service"
 	"github.com/golang-jwt/jwt/v5"
 )
@@ -30,8 +31,13 @@ func (controller *AuthController) Login(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
+	model := model.User{
+		Email:    userLoginRequest.Email,
+		Password: userLoginRequest.Password,
+	}
+
 	//Login Service
-	user, err := controller.service.Login(userLoginRequest)
+	user, err := controller.service.Login(model)
 	if err != nil {
 		helper.JsonWriteToErrorResponse(w, err, http.StatusBadRequest)
 		return
@@ -76,16 +82,6 @@ func (controller *AuthController) Register(w http.ResponseWriter, r *http.Reques
 	}
 
 	w.WriteHeader(http.StatusCreated)
-}
-
-func VerifyAccount(w http.ResponseWriter, r *http.Request) {
-	var userVerifyAccounRequest dto.UserVerifyAccountRequest
-
-	err := json.NewDecoder(r.Body).Decode(&userVerifyAccounRequest)
-	if err != nil {
-		helper.JsonWriteToErrorResponse(w, err, http.StatusBadRequest)
-		return
-	}
 }
 
 func (controller *AuthController) VerifyAccount(w http.ResponseWriter, r *http.Request) {

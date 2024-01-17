@@ -13,7 +13,7 @@ import (
 )
 
 type IAuthService interface {
-	Login(user dto.UserLoginRequest) (model.User, error)
+	Login(model model.User) (model.User, error)
 	Register(user dto.UserRegisterRequest) error
 	VerifyAccount(user dto.UserVerifyAccountRequest) error
 	ForgotPassword(userForgotPasswordRequest dto.UserForgotPasswordRequest) error
@@ -27,13 +27,6 @@ type AuthService struct {
 
 // ResetPassword implements IAuthService.
 func (service *AuthService) ResetPassword(user dto.UserResetPasswordRequest) error {
-	var err error
-
-	err = user.Validate()
-	if err != nil {
-		return err
-	}
-
 	findedUser, err := service.authRepository.GetUserByEmail(user.Email)
 	if err != nil {
 		return common.USER_NOT_FOUND
@@ -54,10 +47,6 @@ func (service *AuthService) ResetPassword(user dto.UserResetPasswordRequest) err
 
 // ForgotPassword implements IAuthService.
 func (service *AuthService) ForgotPassword(userForgotPasswordRequest dto.UserForgotPasswordRequest) error {
-	var err error
-
-	err = userForgotPasswordRequest.Validate()
-
 	findedUser, err := service.authRepository.GetUserByEmail(userForgotPasswordRequest.Email)
 	if err != nil {
 		return common.USER_NOT_FOUND
@@ -74,11 +63,6 @@ func NewAuthService(authRepository repository.IUserRepository, tokenRepository r
 
 // VerifyAccount implements IAuthService.
 func (service *AuthService) VerifyAccount(user dto.UserVerifyAccountRequest) error {
-	err := user.Validate()
-	if err != nil {
-		return err
-	}
-
 	findedUser, err := service.authRepository.GetUserByEmail(user.Email)
 	if err != nil {
 		return common.USER_NOT_FOUND
@@ -94,49 +78,35 @@ func (service *AuthService) VerifyAccount(user dto.UserVerifyAccountRequest) err
 	}
 
 	findedUser.AccountConfirmed = true
-	service.authRepository.UpdateUser(findedUser)
+	return service.authRepository.UpdateUser(findedUser)
 
-	return nil
 }
 
 // Login implements IUserService.
-func (service *AuthService) Login(user dto.UserLoginRequest) (model.User, error) {
-	var responseUser model.User
-
-	//Check Is Valid?
-	err := user.Validate()
-	if err != nil {
-		return responseUser, err
-	}
+func (service *AuthService) Login(model model.User) (model.User, error) {
 
 	//Check Already Has Email?
-	responseUser, err = service.authRepository.GetUserByEmail(user.Email)
+	findedUser, err := service.authRepository.GetUserByEmail(model.Email)
 	if err != nil {
-		return responseUser, common.USER_NOT_FOUND
+		return findedUser, common.USER_NOT_FOUND
 	}
 
 	//Check Account Confirmed
-	if !responseUser.AccountConfirmed {
-		return responseUser, common.UN_CONFIRMED_ACCOUNT
+	if !findedUser.AccountConfirmed {
+		return findedUser, common.UN_CONFIRMED_ACCOUNT
 	}
 
 	//Check Password Is Same?
-	err = bcrypt.CompareHashAndPassword([]byte(responseUser.Password), []byte(user.Password))
+	err = bcrypt.CompareHashAndPassword([]byte(findedUser.Password), []byte(model.Password))
 	if err != nil && err == bcrypt.ErrMismatchedHashAndPassword {
-		return responseUser, common.USER_NOT_FOUND
+		return findedUser, common.USER_NOT_FOUND
 	}
 
-	return responseUser, nil
+	return findedUser, nil
 }
 
 // Register implements IUserService.
 func (service *AuthService) Register(user dto.UserRegisterRequest) error {
-	//Check Is Valid?
-	err := user.Validate()
-	if err != nil {
-		return err
-	}
-
 	//Check Email Already Using And Confirmed?
 	currentUser, err := service.authRepository.GetUserByEmail(user.Email)
 	if err == nil && currentUser.AccountConfirmed {
@@ -147,21 +117,27 @@ func (service *AuthService) Register(user dto.UserRegisterRequest) error {
 	user.Password = helper.HashPassword(user.Password)
 
 	//Convert User Model
-	userModel := user.ToUser()
-	userModel.UserId = currentUser.UserId
+	model := model.User{
+		UserId:           currentUser.UserId,
+		FirstName:        user.FirstName,
+		LastName:         user.LastName,
+		Email:            user.Email,
+		Password:         user.Password,
+		AccountConfirmed: currentUser.AccountConfirmed,
+	}
 
 	//User Already Have Override Else Save User To Db
 	if currentUser.UserId != "" {
-		err = service.authRepository.UpdateUser(userModel)
+		err = service.authRepository.UpdateUser(model)
 	} else {
-		userModel.UserId = uuid.New().String()
-		err = service.authRepository.CreateUser(userModel)
+		model.UserId = uuid.New().String()
+		err = service.authRepository.CreateUser(model)
 	}
 	if err != nil {
 		return err
 	}
 
-	err = service.SendOtpToken(userModel.Email)
+	err = service.SendOtpToken(model.Email)
 
 	return err
 }

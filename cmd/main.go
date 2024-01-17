@@ -41,6 +41,12 @@ func main() {
 	//Assing all routes to mux router
 	userRouter := router.NewAuthRouter(&ctx, dbPool)
 	userRouter.RegisterUserRoutes(muxRouter)
+	categoryRouter := router.NewCategoryRouter(&ctx, dbPool)
+	categoryRouter.RegisterCategoryRoutes(muxRouter)
+	projectRouter := router.NewProjectRouter(&ctx, dbPool)
+	projectRouter.RegisterProjectRoutes(muxRouter)
+	expenseRouter := router.NewExpenseRouter(&ctx, dbPool)
+	expenseRouter.RegisterExpensesRoutes(muxRouter)
 
 	//Log it
 	log.Infof("Server Starting At: %s", listenAddr)

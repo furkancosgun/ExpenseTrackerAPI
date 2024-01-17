@@ -34,6 +34,7 @@ CREATE TABLE IF NOT EXISTS projects (
 CREATE TABLE IF NOT EXISTS expenses (
     expense_id VARCHAR(255) PRIMARY KEY,
     project_id VARCHAR(255) NOT NULL,
+    user_id VARCHAR(255) NOT NULL,
     merchant_name VARCHAR(255) NOT NULL,
     amount FLOAT NOT NULL,
     date TIMESTAMP NOT NULL,
@@ -43,5 +44,6 @@ CREATE TABLE IF NOT EXISTS expenses (
     vat FLOAT,
     image_path VARCHAR(255),
     FOREIGN KEY (project_id) REFERENCES projects(project_id),
-    FOREIGN KEY (category_id) REFERENCES categories(category_id)
+    FOREIGN KEY (category_id) REFERENCES categories(category_id),
+    FOREIGN KEY (user_id) REFERENCES users(user_id)
 );

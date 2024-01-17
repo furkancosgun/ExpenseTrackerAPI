@@ -20,7 +20,7 @@ func NewCategoryRouter(ctx *context.Context, dbPool *pgxpool.Pool) *CategoryRout
 	return &CategoryRouter{ctx: ctx, dbPool: dbPool}
 }
 
-func (route *CategoryRouter) RegisterUserRoutes(router *mux.Router) {
+func (route *CategoryRouter) RegisterCategoryRoutes(router *mux.Router) {
 	ctx := context.Background()
 
 	//Repos
@@ -33,6 +33,6 @@ func (route *CategoryRouter) RegisterUserRoutes(router *mux.Router) {
 	controler := controller.NewCategoryController(service)
 
 	//Endpoint assigment
-	router.HandleFunc(common.BASE_URL+"create-category", controler.CreateCategory).Methods("POST")
-	router.HandleFunc(common.BASE_URL+"get-categories", controler.GetCategories).Methods("POST")
+	router.HandleFunc(common.BASE_URL+"category/create", controler.CreateCategory).Methods("POST")
+	router.HandleFunc(common.BASE_URL+"category/list", controler.GetCategories).Methods("POST")
 }
