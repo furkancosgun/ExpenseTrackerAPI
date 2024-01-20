@@ -34,5 +34,6 @@ func (route *ProjectRouter) RegisterProjectRoutes(router *mux.Router) {
 
 	//Endpoint assigment
 	router.HandleFunc(common.BASE_URL+"project/create", controler.CreateProject).Methods("POST")
-	router.HandleFunc(common.BASE_URL+"project/list", controler.GetProjectReportByUserId).Methods("POST")
+	router.HandleFunc(common.BASE_URL+"project/report-list", controler.GetProjectReportByUserId).Methods("POST")
+	router.HandleFunc(common.BASE_URL+"project/list", controler.GetProjects).Methods("POST")
 }

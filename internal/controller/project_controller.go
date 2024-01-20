@@ -56,3 +56,14 @@ func (controller *ProjectController) CreateProject(w http.ResponseWriter, r *htt
 	}
 	w.WriteHeader(http.StatusCreated)
 }
+func (controller *ProjectController) GetProjects(w http.ResponseWriter, r *http.Request) {
+	userId := r.Context().Value(common.AUTH_USER_ID).(string)
+
+	response, err := controller.service.GetProjects(userId)
+	if err != nil {
+		helper.JsonWriteToErrorResponse(w, err, http.StatusBadRequest)
+		return
+	}
+
+	helper.JsonWriteToResponse(w, response, http.StatusOK)
+}

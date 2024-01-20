@@ -28,6 +28,7 @@ func AuthenticationMiddleware(h http.Handler) http.Handler {
 		tokenHeaderList := strings.Split(tokenHeader, " ")
 		if len(tokenHeaderList) != 2 {
 			w.WriteHeader(http.StatusUnauthorized)
+			return
 		}
 
 		tokenStr := tokenHeaderList[1]

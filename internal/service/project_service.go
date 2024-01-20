@@ -9,12 +9,18 @@ import (
 )
 
 type IProjectService interface {
-	GetProjectReportByUserId(userId string) ([]dto.ListProjectResponse, error)
+	GetProjectReportByUserId(userId string) ([]dto.ProjectReportResponse, error)
 	CreateProject(model model.Project) error
+	GetProjects(userId string) ([]dto.ProjectListResponse, error)
 }
 
 type ProjectService struct {
 	repository repository.IProjectRepository
+}
+
+// GetProjects implements IProjectService.
+func (service *ProjectService) GetProjects(userId string) ([]dto.ProjectListResponse, error) {
+	return service.repository.GetProjects(userId)
 }
 
 // CreateProject implements IProjectService.
@@ -24,7 +30,7 @@ func (service *ProjectService) CreateProject(model model.Project) error {
 }
 
 // GetProjectReportByUserId implements IProjectService.
-func (service *ProjectService) GetProjectReportByUserId(userId string) ([]dto.ListProjectResponse, error) {
+func (service *ProjectService) GetProjectReportByUserId(userId string) ([]dto.ProjectReportResponse, error) {
 	return service.repository.GetProjectReportByUserId(userId)
 }
 

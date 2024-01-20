@@ -37,7 +37,7 @@ CREATE TABLE IF NOT EXISTS expenses (
     user_id VARCHAR(255) NOT NULL,
     merchant_name VARCHAR(255) NOT NULL,
     amount FLOAT NOT NULL,
-    date TIMESTAMP NOT NULL,
+    date VARCHAR(255) NOT NULL,
     description VARCHAR(255),
     category_id VARCHAR(255),
     include_vat BOOLEAN,

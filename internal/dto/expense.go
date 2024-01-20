@@ -1,14 +1,10 @@
 package dto
 
-import (
-	"time"
-)
-
 type CreateExpenseRequest struct {
 	ProjectId    string
 	MerchantName string
 	Amount       float32
-	Date         time.Time
+	Date         string
 	Description  string
 	CategoryId   string
 	IncludeVat   bool

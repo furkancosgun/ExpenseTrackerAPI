@@ -9,13 +9,37 @@ import (
 )
 
 type IProjectRepository interface {
-	GetProjectReportByUserId(userId string) ([]dto.ListProjectResponse, error)
+	GetProjectReportByUserId(userId string) ([]dto.ProjectReportResponse, error)
 	CreateProject(token model.Project) error
+	GetProjects(userId string) ([]dto.ProjectListResponse, error)
 }
 
 type ProjectRepository struct {
 	ctx    *context.Context
 	dbPool *pgxpool.Pool
+}
+
+// GetProjects implements IProjectRepository.
+func (repository *ProjectRepository) GetProjects(userId string) ([]dto.ProjectListResponse, error) {
+	var projects []dto.ProjectListResponse
+
+	row, err := repository.dbPool.Query(*repository.ctx,
+		`SELECT project_id,name from projects where user_id = $1;
+		`, userId,
+	)
+	if err != nil {
+		return projects, err
+	}
+
+	var project dto.ProjectListResponse
+	for row.Next() {
+		err = row.Scan(&project.ProjectId, &project.ProjectName)
+		if err != nil {
+			break
+		}
+		projects = append(projects, project)
+	}
+	return projects, err
 }
 
 func NewProjectRepository(ctx context.Context, dbPool *pgxpool.Pool) IProjectRepository {
@@ -32,8 +56,8 @@ func (repository *ProjectRepository) CreateProject(project model.Project) error 
 }
 
 // GetTokenByUserId implements ITokenRepository.
-func (repository *ProjectRepository) GetProjectReportByUserId(userId string) ([]dto.ListProjectResponse, error) {
-	var projects []dto.ListProjectResponse
+func (repository *ProjectRepository) GetProjectReportByUserId(userId string) ([]dto.ProjectReportResponse, error) {
+	var projects []dto.ProjectReportResponse
 
 	row, err := repository.dbPool.Query(*repository.ctx,
 		`
@@ -54,7 +78,11 @@ func (repository *ProjectRepository) GetProjectReportByUserId(userId string) ([]
 		`, userId,
 	)
 
-	var project dto.ListProjectResponse
+	if err != nil {
+		return projects, err
+	}
+
+	var project dto.ProjectReportResponse
 	for row.Next() {
 		err = row.Scan(&project.ProjectId, &project.ProjectName, &project.TotalAmount, &project.CreatedAt, &project.TotalExpenses)
 		if err != nil {

@@ -41,7 +41,7 @@ func (repository *CategoryRepository) GetCategories(userId string) ([]dto.ListCa
 
 	var category dto.ListCategoryResponse
 	for row.Next() {
-		err = row.Scan(&category.CategoryId, &category.Name)
+		err = row.Scan(&category.CategoryId, &category.CategoryName)
 		if err != nil {
 			break
 		}
