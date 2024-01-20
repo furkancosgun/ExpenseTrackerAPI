@@ -42,7 +42,6 @@ CREATE TABLE IF NOT EXISTS expenses (
     category_id VARCHAR(255),
     include_vat BOOLEAN,
     vat FLOAT,
-    image_path VARCHAR(255),
     FOREIGN KEY (project_id) REFERENCES projects(project_id),
     FOREIGN KEY (category_id) REFERENCES categories(category_id),
     FOREIGN KEY (user_id) REFERENCES users(user_id)
