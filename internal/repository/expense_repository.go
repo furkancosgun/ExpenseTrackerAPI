@@ -24,8 +24,8 @@ func NewExpenseRepository(ctx context.Context, dbPool *pgxpool.Pool) IExpenseRep
 // CreateToken implements ITokenRepository.
 func (repository *ExpenseRepository) CreateExpense(expense model.Expense) error {
 	_, err := repository.dbPool.Exec(*repository.ctx,
-		"INSERT INTO expenses (expense_id,project_id,user_id,merchant_name,amount,date,description,category_id,include_vat,vat,image_path) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)",
-		expense.ExpenseId, expense.ProjectId, expense.UserId, expense.MerchantName, expense.Amount, expense.Date, expense.Description, expense.CategoryId, expense.IncludeVat, expense.Vat, expense.ImagePath,
+		"INSERT INTO expenses (expense_id,project_id,user_id,merchant_name,amount,date,description,category_id,include_vat,vat) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)",
+		expense.ExpenseId, expense.ProjectId, expense.UserId, expense.MerchantName, expense.Amount, expense.Date, expense.Description, expense.CategoryId, expense.IncludeVat, expense.Vat,
 	)
 	return err
 }
@@ -40,7 +40,7 @@ func (repository *ExpenseRepository) GetExpenses(userId string) ([]model.Expense
 
 	var expense model.Expense
 	for row.Next() {
-		err = row.Scan(&expense.ExpenseId, &expense.ProjectId, &expense.UserId, &expense.MerchantName, &expense.Amount, &expense.Date, &expense.Description, &expense.CategoryId, &expense.IncludeVat, &expense.Vat, &expense.ImagePath)
+		err = row.Scan(&expense.ExpenseId, &expense.ProjectId, &expense.UserId, &expense.MerchantName, &expense.Amount, &expense.Date, &expense.Description, &expense.CategoryId, &expense.IncludeVat, &expense.Vat)
 		if err != nil {
 			break
 		}

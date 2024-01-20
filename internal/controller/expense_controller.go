@@ -55,7 +55,6 @@ func (controller *ExpenseController) CreateExpense(w http.ResponseWriter, r *htt
 		CategoryId:   dto.CategoryId,
 		IncludeVat:   dto.IncludeVat,
 		Vat:          dto.Vat,
-		ImagePath:    dto.ImagePath,
 	}
 
 	err = controller.service.CreateExpense(model)

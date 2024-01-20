@@ -9,5 +9,4 @@ type CreateExpenseRequest struct {
 	CategoryId   string
 	IncludeVat   bool
 	Vat          float32
-	ImagePath    string
 }
